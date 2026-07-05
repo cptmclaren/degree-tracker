@@ -1,3 +1,4 @@
+<!-- v2.1 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -381,7 +382,6 @@ const LOCK='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AA
 
 
 let _s=null;
-const sbH=()=>({'Content-Type':'application/json','apikey':SK,'Authorization':`Bearer ${_s?.access_token||SK}`});
 // ── CLOUDFLARE WORKER API ──
 async function apiPost(path, body, token) {
   const headers = {'Content-Type':'application/json'};
@@ -760,4 +760,35 @@ function openModal(id){
   document.getElementById('overlay').classList.add('on');
   document.querySelector('.modal').scrollTop=0;
 }
-function setInst(i){mInst=i;document.getElementById('mc').className='m-code '
+function setInst(i){mInst=i;document.getElementById('mc').className='m-code '+i;updIB();}
+function updIB(){
+  document.getElementById('ib-utd').className='ib'+(mInst==='utd'?' on-utd':'');
+  document.getElementById('ib-dc').className='ib'+(mInst==='dc'?' on-dc':'');
+}
+function closeModal(){document.getElementById('overlay').classList.remove('on');}
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
+function saveModal(){
+  if(!mId)return;
+  const grade=mSt==='done'?document.getElementById('mg').value.trim().toUpperCase():'';
+  state[mId]={status:mSt,grade,inst:mInst};
+  closeModal();renderAll();schedSave();
+}
+
+let _tt;
+function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('on'),2400);}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeModal();
+  if(e.key==='Enter'&&document.activeElement?.classList.contains('a-inp')){
+    if(document.getElementById('auth-s').style.display==='none')doLogin();
+    else doSignup();
+  }
+});
+
+(async()=>{
+  if(lSess()){const u=await sbUser();if(u){await enterApp(u);return;}cSess();}
+  document.getElementById('auth').style.display='flex';
+})();
+</script>
+</body>
+</html>
