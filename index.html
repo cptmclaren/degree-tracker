@@ -99,7 +99,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 .kcard.utd .kc-code{color:rgba(251,146,60,.85)}
 .kcard.dc  .kc-code{color:rgba(56,189,248,.85)}
 .kcard.locked .kc-code{color:var(--text4)}
-.kc-name{font-size:13px;font-weight:500;line-height:1.3;color:var(--text);letter-spacing:-.1px;margin-bottom:10px}
+.kc-name{font-size:13px;font-weight:500;line-height:1.35;color:var(--text);letter-spacing:-.1px;margin-bottom:10px;word-break:break-word}
 .kc-foot{display:flex;align-items:center;gap:6px}
 .kc-cr{font-size:11px;color:var(--text3)}
 .kc-grade{margin-left:auto;font-size:12px;font-weight:600;color:var(--green)}
@@ -190,20 +190,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
   .tb-meta{font-size:12px}
   #board{padding:0;gap:0;overflow:hidden;flex-direction:row;width:100%;scroll-snap-type:x mandatory}
   .col{width:100vw;min-width:100vw;flex-shrink:0;padding:14px 20px;padding-bottom:calc(80px + var(--safe-bot));scroll-snap-align:start}
-  .kcard{border-radius:18px;padding:15px 17px}
+  .kcard{border-radius:12px;padding:14px 16px}
   .kcard:hover{transform:none;box-shadow:none}
   .kcard:active{transform:scale(.98);opacity:.85}
-  .kc-name{font-size:14px}
+  .kc-name{font-size:13.5px;margin-bottom:10px}
   #mob-dots{display:flex!important;justify-content:center;gap:5px;padding:6px 0;flex-shrink:0}
   .md{width:6px;height:6px;border-radius:50%;background:var(--text4);transition:all .2s}
   .md.on{background:var(--text);width:16px}
   #mob-tabs{display:flex!important;position:fixed;bottom:0;left:0;right:0;background:rgba(8,8,8,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--bdr);padding:7px 0;padding-bottom:calc(7px + var(--safe-bot));z-index:400}
   .mt{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 4px;border:none;background:none;cursor:pointer;transition:all .15s}
   .mt:active{transform:scale(.88)}
-  .mt-i{font-size:19px;line-height:1;transition:transform .2s}
+  .mt-i{display:flex;align-items:center;justify-content:center;line-height:1;transition:transform .2s;color:var(--text3)}
   .mt-l{font-size:10px;font-weight:500;color:var(--text3);letter-spacing:-.1px}
   .mt.on .mt-l{color:var(--text)}
-  .mt.on .mt-i{transform:scale(1.1)}
+  .mt.on .mt-i{transform:scale(1.1);color:var(--text)}
   #overlay{align-items:flex-end;padding:0}
   .modal{border-radius:24px 24px 0 0;max-height:88dvh;padding:10px 22px calc(28px + var(--safe-bot));width:100%;max-width:100%}
   .modal::before{content:"";display:block;width:34px;height:4px;background:var(--surf3);border-radius:99px;margin:0 auto 18px}
@@ -331,10 +331,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 
   <!-- Mobile bottom tabs -->
   <div id="mob-tabs">
-    <button class="mt on" data-v="board"    onclick="swV('board',this)"><div class="mt-i">⊞</div><div class="mt-l">Board</div></button>
-    <button class="mt"    data-v="timeline" onclick="swV('timeline',this)"><div class="mt-i">📅</div><div class="mt-l">Timeline</div></button>
-    <button class="mt"    data-v="gpa"      onclick="swV('gpa',this)"><div class="mt-i">📊</div><div class="mt-l">GPA</div></button>
-    <button class="mt"    data-v="stats"    onclick="swV('stats',this)"><div class="mt-i">🎯</div><div class="mt-l">Stats</div></button>
+    <button class="mt on" data-v="board" onclick="swV('board',this)">
+      <div class="mt-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+      <div class="mt-l">Board</div>
+    </button>
+    <button class="mt" data-v="timeline" onclick="swV('timeline',this)">
+      <div class="mt-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14" stroke-width="2.5"/><line x1="12" y1="14" x2="12" y2="14" stroke-width="2.5"/><line x1="16" y1="14" x2="16" y2="14" stroke-width="2.5"/></svg></div>
+      <div class="mt-l">Timeline</div>
+    </button>
+    <button class="mt" data-v="gpa" onclick="swV('gpa',this)">
+      <div class="mt-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div class="mt-l">GPA</div>
+    </button>
+    <button class="mt" data-v="stats" onclick="swV('stats',this)">
+      <div class="mt-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+      <div class="mt-l">Stats</div>
+    </button>
   </div>
 </div>
 
