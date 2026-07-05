@@ -99,7 +99,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 .kcard.utd .kc-code{color:rgba(251,146,60,.85)}
 .kcard.dc  .kc-code{color:rgba(56,189,248,.85)}
 .kcard.locked .kc-code{color:var(--text4)}
-.kc-name{font-size:13px;font-weight:500;line-height:1.35;color:var(--text);letter-spacing:-.1px;margin-bottom:10px;word-break:break-word}
+.kc-name{font-size:13px;font-weight:500;line-height:1.35;color:var(--text);letter-spacing:-.1px;margin-bottom:10px}
 .kc-foot{display:flex;align-items:center;gap:6px}
 .kc-cr{font-size:11px;color:var(--text3)}
 .kc-grade{margin-left:auto;font-size:12px;font-weight:600;color:var(--green)}
@@ -190,7 +190,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
   .tb-meta{font-size:12px}
   #board{padding:0;gap:0;overflow:hidden;flex-direction:row;width:100%;scroll-snap-type:x mandatory}
   .col{width:100vw;min-width:100vw;flex-shrink:0;padding:14px 20px;padding-bottom:calc(80px + var(--safe-bot));scroll-snap-align:start}
-  .kcard{border-radius:12px;padding:14px 16px}
+  .kcard{border-radius:13px;padding:15px 16px}
   .kcard:hover{transform:none;box-shadow:none}
   .kcard:active{transform:scale(.98);opacity:.85}
   .kc-name{font-size:13.5px;margin-bottom:10px}
@@ -417,47 +417,56 @@ function cSess(){localStorage.removeItem(SKEY);}
 function lSess(){try{const s=JSON.parse(localStorage.getItem(SKEY)||'null');if(s?.token){_s=s;return true;}}catch{}return false;}
 
 const COURSES=[
+  // FIRST YEAR
   {id:'ECS1100', name:'Intro to Engineering & CS',credits:1,cat:'intro',prereqs:[],coreqs:[],sem:1},
   {id:'MECH1100',name:'Intro to Mechanical Engineering I',credits:1,cat:'intro',prereqs:[],coreqs:[],sem:1},
+
+  // MAJOR PREPARATORY
   {id:'MATH2413',name:'Differential Calculus (Calc I)',credits:4,cat:'prep',prereqs:[],coreqs:[],sem:1,note:'Requires ALEKS 80% or MATH 2312.'},
   {id:'MATH2414',name:'Integral Calculus (Calc II)',credits:4,cat:'prep',prereqs:['MATH2413'],coreqs:[],sem:2},
-  {id:'MATH2415',name:'Calculus of Several Variables',credits:4,cat:'prep',prereqs:['MATH2414'],coreqs:[],sem:3,note:'On the 2413→2414→2415 path. After MATH 2414.'},
-  {id:'MATH2420',name:'Differential Equations',credits:4,cat:'prep',prereqs:['MATH2415'],coreqs:[],sem:4},
+  {id:'MATH2415',name:'Calculus of Several Variables',credits:4,cat:'prep',prereqs:['MATH2414'],coreqs:[],sem:3,note:'Taken ONLY after MATH 2414. Not required for students on the MATH 2417/2419 path.'},
+  {id:'MATH2420',name:'Differential Equations with Applications',credits:4,cat:'prep',prereqs:['MATH2415'],coreqs:[],sem:4},
   {id:'CHEM1311',name:'General Chemistry I',credits:3,cat:'prep',prereqs:[],coreqs:[],sem:1},
   {id:'CHEM1111',name:'General Chemistry Lab I',credits:1,cat:'prep',prereqs:[],coreqs:['CHEM1311'],sem:1},
   {id:'CS1325',  name:'Intro to Programming',credits:3,cat:'prep',prereqs:[],coreqs:[],sem:1,note:'Satisfied by CS 1337.'},
-  {id:'MECH1208',name:'Intro to Mechanical Engineering II',credits:2,cat:'prep',prereqs:['MECH1100'],coreqs:[],sem:2},
+  {id:'MECH1208',name:'Intro to Mechanical Engineering II',credits:2,cat:'prep',prereqs:['MECH1100'],coreqs:[],sem:2,note:'Pre/coreqs: MATH 2414 or 2419, PHYS 2325/2125.'},
   {id:'PHYS2325',name:'Mechanics (Physics I)',credits:3,cat:'prep',prereqs:['MATH2413'],coreqs:[],sem:2},
   {id:'PHYS2125',name:'Physics Lab I',credits:1,cat:'prep',prereqs:['MATH2413'],coreqs:['PHYS2325'],sem:2},
   {id:'PHYS2326',name:'Electromagnetism & Waves (Physics II)',credits:3,cat:'prep',prereqs:['PHYS2325','MATH2414'],coreqs:[],sem:3},
   {id:'PHYS2126',name:'Physics Lab II',credits:1,cat:'prep',prereqs:['PHYS2325','MATH2414'],coreqs:['PHYS2326'],sem:3},
   {id:'ENGR2300',name:'Applied Linear Algebra',credits:3,cat:'prep',prereqs:['MATH2413'],coreqs:[],sem:2},
-  {id:'MECH2310',name:'Statics',credits:3,cat:'prep',prereqs:['MECH1208','ENGR2300'],coreqs:[],sem:3},
+  {id:'MECH2310',name:'Statics',credits:3,cat:'prep',prereqs:['MECH1208','PHYS2325'],coreqs:[],sem:3,note:'Pre/coreqs: MATH 2415 or 2419, ENGR 2300.'},
   {id:'MECH2320',name:'Mechanics of Materials',credits:3,cat:'prep',prereqs:['MECH2310'],coreqs:[],sem:4},
   {id:'MECH2120',name:'Mechanics of Materials Lab',credits:1,cat:'prep',prereqs:['MECH2310'],coreqs:['MECH2320'],sem:4},
-  {id:'MECH2330',name:'Dynamics',credits:3,cat:'prep',prereqs:['MECH2310','MATH2420'],coreqs:[],sem:5},
-  {id:'MECH3300',name:'Applied Engineering Mathematics',credits:3,cat:'major',prereqs:['MATH2415','ENGR2300'],coreqs:['MATH2420'],sem:3,note:'Coreq: MATH 2420.'},
-  {id:'MECH3310',name:'Thermodynamics',credits:3,cat:'major',prereqs:['MECH1208','PHYS2325'],coreqs:['MECH3300'],sem:4},
-  {id:'MECH3315',name:'Fluid Mechanics',credits:3,cat:'major',prereqs:['MECH3300','MECH2330','MECH3310'],coreqs:[],sem:5},
-  {id:'MECH3115',name:'Fluid Mechanics Lab',credits:1,cat:'major',prereqs:['MECH3315'],coreqs:[],sem:6},
+  {id:'MECH2330',name:'Dynamics',credits:3,cat:'prep',prereqs:['MECH2310','MATH2420','ENGR2300'],coreqs:[],sem:5},
+
+  // MAJOR CORE — NOTE: MECH 3300 is now ENGR 3300
+  {id:'ENGR3300',name:'Advanced Engineering Mathematics',credits:3,cat:'major',prereqs:['MATH2415','ENGR2300'],coreqs:['MATH2420'],sem:3,note:'Prereqs: MATH 2415 (or 2419) + ENGR 2300. Coreq: MATH 2420. Previously listed as MECH 3300.'},
+  {id:'MECH3310',name:'Thermodynamics',credits:3,cat:'major',prereqs:['MECH1208','PHYS2325','ENGR3300'],coreqs:[],sem:4,note:'Prereqs: MECH 1208 + PHYS 2325 + ENGR 3300. CHEM 1311 coreq per map.'},
+  {id:'MECH3315',name:'Fluid Mechanics',credits:3,cat:'major',prereqs:['ENGR3300','MECH2330','MECH3310'],coreqs:[],sem:5},
+  {id:'MECH3115',name:'Fluid Mechanics Lab',credits:1,cat:'major',prereqs:['MECH3315'],coreqs:[],sem:6,note:'Recommended to take lab in the next long semester after lecture.'},
   {id:'MECH3320',name:'Heat Transfer',credits:3,cat:'major',prereqs:['MECH3310','MECH3315'],coreqs:[],sem:6},
-  {id:'MECH3120',name:'Heat Transfer Lab',credits:1,cat:'major',prereqs:['MECH3320'],coreqs:[],sem:7},
-  {id:'MECH3305',name:'Computer Aided Design',credits:3,cat:'major',prereqs:['MECH1208','CS1325','ENGR2300'],coreqs:['MECH3105'],sem:5},
-  {id:'MECH3105',name:'CAD Laboratory',credits:1,cat:'major',prereqs:['MECH1208','CS1325','ENGR2300'],coreqs:['MECH3305'],sem:5},
-  {id:'MECH3350',name:'Kinematics & Dynamics of Mech. Systems',credits:3,cat:'major',prereqs:['MECH2330','MATH2420','ENGR2300','MECH3300'],coreqs:[],sem:5},
-  {id:'MECH3150',name:'Kinematics & Dynamics Lab',credits:1,cat:'major',prereqs:['MECH3350'],coreqs:[],sem:6},
-  {id:'MECH3351',name:'Design of Mechanical Systems',credits:3,cat:'major',prereqs:['MECH2320','MECH3350','MECH3300'],coreqs:[],sem:6},
+  {id:'MECH3120',name:'Heat Transfer Lab',credits:1,cat:'major',prereqs:['MECH3320'],coreqs:[],sem:7,note:'Recommended to take lab in the next long semester after lecture.'},
+  {id:'MECH3305',name:'Computer Aided Design',credits:3,cat:'major',prereqs:['ENGR2300','CS1325','MECH1208'],coreqs:['MECH3105'],sem:5},
+  {id:'MECH3105',name:'CAD Laboratory',credits:1,cat:'major',prereqs:['ENGR2300','CS1325','MECH1208'],coreqs:['MECH3305'],sem:5,note:'Recommended to take lab in the next long semester after lecture.'},
+  {id:'MECH3350',name:'Kinematics & Dynamics of Mech. Systems',credits:3,cat:'major',prereqs:['ENGR2300','MATH2420','ENGR3300','MECH2330'],coreqs:[],sem:5},
+  {id:'MECH3150',name:'Kinematics & Dynamics Lab',credits:1,cat:'major',prereqs:['MECH3350'],coreqs:[],sem:6,note:'Recommended to take lab in the next long semester after lecture.'},
+  {id:'MECH3351',name:'Design of Mechanical Systems',credits:3,cat:'major',prereqs:['ENGR3300','MECH3350','MECH2320'],coreqs:[],sem:6},
   {id:'MECH3340',name:'System Dynamics Modeling & Analysis',credits:3,cat:'major',prereqs:['MECH3315'],coreqs:[],sem:6},
-  {id:'ENGR3341',name:'Probability Theory & Statistics',credits:3,cat:'major',prereqs:['MATH2414'],coreqs:['MATH2420'],sem:4},
+  {id:'ENGR3341',name:'Probability Theory & Statistics',credits:3,cat:'major',prereqs:['MATH2414'],coreqs:['MATH2420'],sem:4,note:'Prereq: MATH 2414 or 2419. Coreq MATH 2420 recommended.'},
   {id:'ECS2390', name:'Professional & Technical Communication',credits:3,cat:'major',prereqs:['RHET1302'],coreqs:[],sem:5},
   {id:'MECH4310',name:'Systems and Controls',credits:3,cat:'major',prereqs:['MECH3340'],coreqs:[],sem:7},
-  {id:'MECH4110',name:'Systems and Controls Lab',credits:1,cat:'major',prereqs:['MECH3340'],coreqs:['MECH4310'],sem:7},
-  {id:'MECH4381',name:'Senior Design Project I',credits:3,cat:'major',prereqs:['MECH3351','MECH3340','MECH3320','MECH3305','ECS2390'],coreqs:[],sem:7},
-  {id:'MECH4382',name:'Senior Design Project II',credits:3,cat:'major',prereqs:['MECH4381'],coreqs:[],sem:8},
-  {id:'TE1',name:'Technical Elective 1',credits:3,cat:'elective',prereqs:[],coreqs:[],sem:7,note:'MECH 3XXX/4XXX. At least 3 of 4 from approved list.'},
+  {id:'MECH4110',name:'Systems and Controls Lab',credits:1,cat:'major',prereqs:['MECH3340'],coreqs:['MECH4310'],sem:7,note:'Recommended to take lab in the next long semester after lecture.'},
+  {id:'MECH4381',name:'Senior Design Project I',credits:3,cat:'major',prereqs:['MECH3351','MECH3340','MECH3320','MECH3305','ECS2390'],coreqs:[],sem:7,note:'Must be taken in successive semesters (fall/spring, spring/summer, or summer/fall) with MECH 4382.'},
+  {id:'MECH4382',name:'Senior Design Project II',credits:3,cat:'major',prereqs:['MECH4381'],coreqs:[],sem:8,note:'Must follow MECH 4381 in successive semesters.'},
+
+  // TECHNICAL ELECTIVES (4 generic slots)
+  {id:'TE1',name:'Technical Elective 1',credits:3,cat:'elective',prereqs:[],coreqs:[],sem:7,note:'At least 9 of 12 cr must be from approved MECH list. Remaining 3 cr can be 3000+ ECS with advisor approval. See catalog for full list.'},
   {id:'TE2',name:'Technical Elective 2',credits:3,cat:'elective',prereqs:[],coreqs:[],sem:7},
   {id:'TE3',name:'Technical Elective 3',credits:3,cat:'elective',prereqs:[],coreqs:[],sem:8},
   {id:'TE4',name:'Technical Elective 4',credits:3,cat:'elective',prereqs:[],coreqs:[],sem:8},
+
+  // STATE CORE (completed via A.S.)
   {id:'RHET1302',name:'Rhetoric',credits:3,cat:'core',prereqs:[],coreqs:[],sem:1,note:'Completed via A.S.'},
   {id:'GOVT2305',name:'American National Government',credits:3,cat:'core',prereqs:[],coreqs:[],sem:2,note:'Completed via A.S.'},
   {id:'GOVT2306',name:'State & Local Government',credits:3,cat:'core',prereqs:[],coreqs:[],sem:2,note:'Completed via A.S.'},
@@ -466,7 +475,9 @@ const COURSES=[
   {id:'CORE040', name:'Language, Philosophy & Culture',credits:3,cat:'core',prereqs:[],coreqs:[],sem:2,note:'Completed via A.S.'},
   {id:'CORE050', name:'Creative Arts',credits:3,cat:'core',prereqs:[],coreqs:[],sem:2,note:'Completed via A.S.'},
   {id:'CORE080', name:'Social & Behavioral Sciences',credits:3,cat:'core',prereqs:[],coreqs:[],sem:2,note:'Completed via A.S.'},
-  {id:'FE1',name:'Free Elective',credits:3,cat:'elective',prereqs:[],coreqs:[],sem:8},
+
+  // FREE ELECTIVE
+  {id:'FE1',name:'Free Elective',credits:3,cat:'elective',prereqs:[],coreqs:[],sem:8,note:'Lower- or upper-division course. Check with advisor before enrolling.'},
 ];
 const SEMS=[
   {l:'Freshman — Fall',n:1},{l:'Freshman — Spring',n:2},
@@ -749,35 +760,4 @@ function openModal(id){
   document.getElementById('overlay').classList.add('on');
   document.querySelector('.modal').scrollTop=0;
 }
-function setInst(i){mInst=i;document.getElementById('mc').className='m-code '+i;updIB();}
-function updIB(){
-  document.getElementById('ib-utd').className='ib'+(mInst==='utd'?' on-utd':'');
-  document.getElementById('ib-dc').className='ib'+(mInst==='dc'?' on-dc':'');
-}
-function closeModal(){document.getElementById('overlay').classList.remove('on');}
-document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
-function saveModal(){
-  if(!mId)return;
-  const grade=mSt==='done'?document.getElementById('mg').value.trim().toUpperCase():'';
-  state[mId]={status:mSt,grade,inst:mInst};
-  closeModal();renderAll();schedSave();
-}
-
-let _tt;
-function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('on'),2400);}
-
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')closeModal();
-  if(e.key==='Enter'&&document.activeElement?.classList.contains('a-inp')){
-    if(document.getElementById('auth-s').style.display==='none')doLogin();
-    else doSignup();
-  }
-});
-
-(async()=>{
-  if(lSess()){const u=await sbUser();if(u){await enterApp(u);return;}cSess();}
-  document.getElementById('auth').style.display='flex';
-})();
-</script>
-</body>
-</html>
+function setInst(i){mInst=i;document.getElementById('mc').className='m-code '
