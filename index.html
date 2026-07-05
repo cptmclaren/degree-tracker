@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#000000">
+<title>MECH Tracker</title>
+
+<style>
+:root{
+  --bg:#000;--bg2:#0a0a0a;--surf:#111;--surf2:#1a1a1a;--surf3:#222;
+  --bdr:rgba(255,255,255,.08);--bdr2:rgba(255,255,255,.13);
+  --text:#f5f5f7;--text2:#a1a1a6;--text3:#636366;--text4:#3a3a3c;
+  --green:#30d158;--yellow:#ffd60a;--blue:#0a84ff;--red:#ff453a;
+  --utd:rgba(251,146,60,.75);--dc:rgba(56,189,248,.75);
+  --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
+  --safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px);
+  --r:16px;--r-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#000}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;color:var(--text);height:100dvh;display:flex;flex-direction:column}
+::-webkit-scrollbar{width:0;height:0}
+
+/* AUTH */
+#auth{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:900;padding:calc(var(--safe-top)+40px) 28px calc(var(--safe-bot)+40px)}
+.abox{width:100%;max-width:340px}
+.a-word{font-size:26px;font-weight:700;letter-spacing:-.6px;margin-bottom:6px}
+.a-sub{font-size:14px;color:var(--text3);margin-bottom:32px;font-weight:400}
+.a-lbl{display:block;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.3px;margin-bottom:5px;text-transform:uppercase}
+.a-inp{width:100%;background:var(--surf);border:1px solid var(--bdr2);border-radius:var(--r-sm);padding:13px 15px;color:var(--text);font-family:inherit;font-size:16px;outline:none;transition:border-color .15s;-webkit-appearance:none;margin-bottom:11px}
+.a-inp:focus{border-color:rgba(255,255,255,.28)}
+.a-inp::placeholder{color:var(--text4)}
+.a-btn{width:100%;margin-top:6px;background:var(--text);color:var(--bg);border:none;border-radius:var(--r-sm);padding:14px;font-family:inherit;font-size:15px;font-weight:600;letter-spacing:-.2px;cursor:pointer;transition:opacity .15s;margin-bottom:14px}
+.a-btn:active{opacity:.8}
+.a-btn:disabled{opacity:.4;cursor:not-allowed}
+.a-sw{text-align:center;font-size:13px;color:var(--text3)}
+.a-sw span{color:var(--text);cursor:pointer;font-weight:500}
+.a-err{background:rgba(255,69,58,.1);border:1px solid rgba(255,69,58,.22);border-radius:var(--r-sm);padding:11px 13px;font-size:13px;color:var(--red);margin-bottom:11px;display:none;line-height:1.4}
+.a-ok{background:rgba(48,209,88,.1);border:1px solid rgba(48,209,88,.22);border-radius:var(--r-sm);padding:11px 13px;font-size:13px;color:var(--green);margin-bottom:11px;display:none;line-height:1.4}
+
+/* APP */
+#app{display:none;flex-direction:column;flex:1;height:100%;overflow:hidden}
+#app.on{display:flex}
+
+/* TOPBAR */
+#topbar{flex-shrink:0;background:var(--bg);border-bottom:1px solid var(--bdr);padding-top:var(--safe-top)}
+.tb1{display:flex;align-items:center;gap:12px;padding:12px 24px 8px}
+.tb-title{font-size:14px;font-weight:600;letter-spacing:-.2px;margin-right:auto}
+.tb-meta{font-size:13px;color:var(--text3);font-variant-numeric:tabular-nums}
+.tb-gpa{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--surf2);color:var(--text2)}
+.tb-sync{width:28px;height:28px;border-radius:99px;background:none;border:1px solid var(--bdr2);color:var(--text3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.tb-sync:active{background:var(--surf2)}
+.tb-sync.spin{animation:spin .7s linear infinite;color:var(--text2)}
+.tb-out{font-size:12px;color:var(--text3);cursor:pointer;padding:4px 0}
+.tb-out:hover{color:var(--text)}
+.tb-prog{padding:0 24px 8px;display:flex;align-items:center;gap:10px}
+.tb-bar{flex:1;height:2px;background:var(--surf3);border-radius:99px;overflow:hidden}
+.tb-fill{height:100%;background:var(--text2);border-radius:99px;transition:width .5s ease}
+.tb-pct{font-size:12px;color:var(--text3);font-variant-numeric:tabular-nums;min-width:30px;text-align:right}
+.tb-tabs{display:flex;padding:0 24px;border-top:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none}
+.tb-tabs::-webkit-scrollbar{display:none}
+.tb-tab{padding:9px 14px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border:none;background:none;font-family:inherit;letter-spacing:-.1px;border-bottom:1.5px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap}
+.tb-tab.on{color:var(--text);border-bottom-color:var(--text)}
+
+/* VIEWS */
+#views{flex:1;overflow:hidden;position:relative}
+.view{display:none;height:100%}
+.view.on{display:flex;flex-direction:column}
+.vscroll{flex:1;overflow-y:auto;padding:24px}
+
+/* BOARD */
+#board{display:flex;flex-direction:row;height:100%;overflow-x:auto;overflow-y:hidden;padding:20px 24px;gap:14px;align-items:flex-start}
+.col{flex-shrink:0;width:310px;display:flex;flex-direction:column;height:100%;max-height:100%}
+.col-hdr{display:flex;align-items:center;gap:8px;padding:0 2px 12px;flex-shrink:0}
+.col-t{font-size:12px;font-weight:600;letter-spacing:.1px;color:var(--text3);text-transform:uppercase}
+.col-n{font-size:11px;color:var(--text4);background:var(--surf2);padding:2px 7px;border-radius:99px}
+.col-cr{font-size:11px;color:var(--text4);margin-left:auto}
+.col-body{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;gap:7px;padding:2px 1px;scrollbar-width:none}
+.col-body::-webkit-scrollbar{display:none}
+.col-body.over{background:rgba(255,255,255,.025);border-radius:var(--r)}
+
+/* CARD */
+.kcard{background:var(--surf);border-radius:var(--r);padding:14px 16px;cursor:grab;position:relative;overflow:hidden;transition:transform .12s,box-shadow .12s,opacity .12s;user-select:none;border:1px solid var(--bdr)}
+.kcard:hover{box-shadow:0 6px 24px rgba(0,0,0,.5);transform:translateY(-1px)}
+.kcard:active{cursor:grabbing}
+.kcard.dragging{opacity:.45;transform:scale(.96)}
+.kcard::before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;border-radius:16px 0 0 16px}
+.kcard.utd::before{background:var(--utd)}
+.kcard.dc::before{background:var(--dc)}
+.kcard.locked{opacity:.28;cursor:default;pointer-events:none}
+.kcard.locked::after{content:"";position:absolute;inset:0;border-radius:var(--r)}
+.lock-ov{display:none;position:absolute;inset:0;align-items:center;justify-content:center;border-radius:var(--r)}
+.kcard.locked .lock-ov{display:flex}
+.lock-ov img{width:18px;height:18px;opacity:.5;filter:invert(1)}
+.kc-code{font-size:10.5px;font-weight:600;letter-spacing:.2px;color:var(--text3);margin-bottom:3px}
+.kcard.utd .kc-code{color:rgba(251,146,60,.85)}
+.kcard.dc  .kc-code{color:rgba(56,189,248,.85)}
+.kcard.locked .kc-code{color:var(--text4)}
+.kc-name{font-size:13px;font-weight:500;line-height:1.3;color:var(--text);letter-spacing:-.1px;margin-bottom:10px}
+.kc-foot{display:flex;align-items:center;gap:6px}
+.kc-cr{font-size:11px;color:var(--text3)}
+.kc-grade{margin-left:auto;font-size:12px;font-weight:600;color:var(--green)}
+.kc-inst{font-size:10px;font-weight:500;padding:2px 6px;border-radius:5px}
+.kcard.utd .kc-inst{background:rgba(251,146,60,.1);color:rgba(251,146,60,.85)}
+.kcard.dc  .kc-inst{background:rgba(56,189,248,.08);color:rgba(56,189,248,.85)}
+.kcard.locked .kc-inst{background:var(--surf2);color:var(--text4)}
+
+/* SEMESTER */
+.sem-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.sem-block{background:var(--surf);border-radius:var(--r);overflow:hidden;border:1px solid var(--bdr)}
+.sem-hdr{padding:11px 15px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
+.sem-hdr-t{font-size:12px;font-weight:600;letter-spacing:-.1px}
+.sem-hdr-c{font-size:11px;color:var(--text3)}
+.sem-rows{padding:5px}
+.sr{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;cursor:pointer;transition:background .1s}
+.sr:hover{background:var(--surf2)}
+.sr.lk{opacity:.25;cursor:default;pointer-events:none}
+.sr-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sr-code{font-size:10.5px;font-weight:600;min-width:70px;flex-shrink:0}
+.sr-name{font-size:12px;color:var(--text2);flex:1;line-height:1.3}
+.sr-grade{font-size:11px;font-weight:600;color:var(--green);margin-left:auto}
+
+/* GPA */
+.gpa-wrap{max-width:520px}
+.gpa-hero{text-align:center;padding:28px 0 24px}
+.gpa-n{font-size:60px;font-weight:700;letter-spacing:-3px;color:var(--text)}
+.gpa-l{font-size:13px;color:var(--text3);margin-top:4px}
+.gpa-tbl{background:var(--surf);border-radius:var(--r);overflow:hidden;border:1px solid var(--bdr)}
+.gpa-h,.gpa-r{display:grid;grid-template-columns:1fr 46px 64px 58px;border-bottom:1px solid var(--bdr)}
+.gpa-r:last-child{border-bottom:none}
+.gc{padding:10px 14px;font-size:12px;color:var(--text2)}
+.gpa-h .gc{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);background:var(--surf2)}
+.gc.nm{color:var(--text);font-size:13px;font-weight:500}
+.ga{color:var(--green);font-weight:600}.gb{color:var(--blue);font-weight:600}
+.gc2{color:var(--yellow);font-weight:600}.gd{color:var(--red);font-weight:600}
+
+/* STATS */
+.sc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:20px}
+.sc{background:var(--surf);border-radius:var(--r);padding:16px 18px;border:1px solid var(--bdr)}
+.sc-n{font-size:30px;font-weight:700;letter-spacing:-1.5px;margin-bottom:2px}
+.sc-l{font-size:11px;color:var(--text3)}
+.pb{background:var(--surf);border-radius:var(--r);padding:18px;border:1px solid var(--bdr)}
+.pb-t{font-size:13px;font-weight:600;margin-bottom:14px;letter-spacing:-.2px}
+.pr{display:flex;align-items:center;gap:12px;margin-bottom:11px}
+.pr:last-child{margin-bottom:0}
+.pr-l{font-size:12px;color:var(--text2);min-width:115px;flex-shrink:0}
+.pr-b{flex:1;height:3px;background:var(--surf3);border-radius:99px;overflow:hidden}
+.pr-f{height:100%;border-radius:99px;background:var(--text3);transition:width .5s ease}
+.pr-p{font-size:11px;color:var(--text3);min-width:32px;text-align:right}
+
+/* MODAL */
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:500;display:none;align-items:center;justify-content:center;padding:24px}
+#overlay.on{display:flex}
+.modal{background:var(--surf);border-radius:20px;border:1px solid var(--bdr2);padding:26px;width:100%;max-width:420px;max-height:85dvh;overflow-y:auto;position:relative;animation:fadeUp .18s ease}
+.mc{position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:99px;background:var(--surf2);border:none;color:var(--text3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mc:hover{background:var(--surf3)}
+.m-code{font-size:11px;font-weight:600;letter-spacing:.3px;color:var(--text3);margin-bottom:3px}
+.m-code.utd{color:rgba(251,146,60,.9)}.m-code.dc{color:rgba(56,189,248,.9)}
+.m-title{font-size:19px;font-weight:700;letter-spacing:-.4px;margin-bottom:3px}
+.m-meta{font-size:12px;color:var(--text3);margin-bottom:20px}
+.m-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:7px}
+.irow{display:flex;gap:8px;margin-bottom:18px}
+.ib{flex:1;padding:10px;border-radius:var(--r-sm);border:1px solid var(--bdr2);background:none;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.ib:active{transform:scale(.97)}
+.ib.on-utd{background:rgba(251,146,60,.1);border-color:rgba(251,146,60,.35);color:rgba(251,146,60,1)}
+.ib.on-dc{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.35);color:rgba(56,189,248,1)}
+.idot{width:7px;height:7px;border-radius:50%}
+.plist{margin-bottom:18px;display:flex;flex-direction:column;gap:5px}
+.prow{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2)}
+.prow .ok{color:var(--green)}.prow .no{color:var(--red)}.prow .co{color:var(--text4);font-size:11px}
+.prow b{color:var(--text);font-weight:600}
+.m-note{font-size:12px;color:var(--text3);padding:10px 12px;background:var(--surf2);border-radius:var(--r-sm);margin-bottom:14px;line-height:1.5}
+.g-inp{width:100%;background:var(--surf2);border:1px solid var(--bdr2);border-radius:var(--r-sm);padding:12px 15px;color:var(--text);font-family:inherit;font-size:16px;font-weight:600;margin-bottom:14px;outline:none;transition:border-color .15s;-webkit-appearance:none}
+.g-inp:focus{border-color:rgba(255,255,255,.28)}
+
+/* TOAST */
+#toast{position:fixed;bottom:calc(22px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(8px);background:rgba(30,30,30,.9);border:1px solid var(--bdr2);border-radius:99px;padding:9px 18px;font-size:13px;font-weight:500;color:var(--text2);opacity:0;transition:all .22s;z-index:800;pointer-events:none;white-space:nowrap;backdrop-filter:blur(12px)}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* MOBILE */
+#mob-dots,#mob-tabs{display:none}
+@media(max-width:768px){
+  .tb1{padding:10px 20px 6px}
+  .tb-prog{padding:0 20px 6px}
+  .tb-tabs{display:none}
+  .tb-out{display:none}
+  .tb-meta{font-size:12px}
+  #board{padding:0;gap:0;overflow:hidden;flex-direction:row;width:100%;scroll-snap-type:x mandatory}
+  .col{width:100vw;min-width:100vw;flex-shrink:0;padding:14px 20px;padding-bottom:calc(80px + var(--safe-bot));scroll-snap-align:start}
+  .kcard{border-radius:18px;padding:15px 17px}
+  .kcard:hover{transform:none;box-shadow:none}
+  .kcard:active{transform:scale(.98);opacity:.85}
+  .kc-name{font-size:14px}
+  #mob-dots{display:flex!important;justify-content:center;gap:5px;padding:6px 0;flex-shrink:0}
+  .md{width:6px;height:6px;border-radius:50%;background:var(--text4);transition:all .2s}
+  .md.on{background:var(--text);width:16px}
+  #mob-tabs{display:flex!important;position:fixed;bottom:0;left:0;right:0;background:rgba(8,8,8,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--bdr);padding:7px 0;padding-bottom:calc(7px + var(--safe-bot));z-index:400}
+  .mt{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 4px;border:none;background:none;cursor:pointer;transition:all .15s}
+  .mt:active{transform:scale(.88)}
+  .mt-i{font-size:19px;line-height:1;transition:transform .2s}
+  .mt-l{font-size:10px;font-weight:500;color:var(--text3);letter-spacing:-.1px}
+  .mt.on .mt-l{color:var(--text)}
+  .mt.on .mt-i{transform:scale(1.1)}
+  #overlay{align-items:flex-end;padding:0}
+  .modal{border-radius:24px 24px 0 0;max-height:88dvh;padding:10px 22px calc(28px + var(--safe-bot));width:100%;max-width:100%}
+  .modal::before{content:"";display:block;width:34px;height:4px;background:var(--surf3);border-radius:99px;margin:0 auto 18px}
+  .vscroll{padding:16px 20px;padding-bottom:calc(80px + var(--safe-bot))}
+  .sem-grid{grid-template-columns:1fr}
+  .sc-grid{grid-template-columns:1fr 1fr}
+  .gpa-n{font-size:50px}
+  #toast{bottom:calc(78px + var(--safe-bot))}
+}
+@media(min-width:769px){
+  #mob-tabs{display:none!important}
+  #mob-dots{display:none!important}
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth">
+  <div class="abox">
+    <div id="auth-l">
+      <div class="a-word">MECH Tracker</div>
+      <div class="a-sub">UT Dallas · B.S. Mechanical Engineering</div>
+      <div class="a-err" id="le"></div><div class="a-ok" id="lk"></div>
+      <label class="a-lbl">Email</label>
+      <input class="a-inp" id="li" type="email" placeholder="you@utdallas.edu" autocomplete="email" autocapitalize="none"/>
+      <label class="a-lbl">Password</label>
+      <input class="a-inp" id="lp" type="password" placeholder="••••••••" autocomplete="current-password"/>
+      <button class="a-btn" id="lb" onclick="doLogin()">Sign In</button>
+      <div class="a-sw">No account? <span onclick="showAuth('s')">Create one</span></div>
+    </div>
+    <div id="auth-s" style="display:none">
+      <div class="a-word">Create Account</div>
+      <div class="a-sub">Progress syncs across all devices.</div>
+      <div class="a-err" id="se"></div><div class="a-ok" id="sk"></div>
+      <label class="a-lbl">Email</label>
+      <input class="a-inp" id="si" type="email" placeholder="you@utdallas.edu" autocomplete="email" autocapitalize="none"/>
+      <label class="a-lbl">Password <span style="font-weight:400;color:var(--text4);font-size:10px">(min 8 chars)</span></label>
+      <input class="a-inp" id="sp" type="password" placeholder="••••••••" autocomplete="new-password"/>
+      <label class="a-lbl">Confirm</label>
+      <input class="a-inp" id="sp2" type="password" placeholder="••••••••" autocomplete="new-password"/>
+      <button class="a-btn" id="sb" onclick="doSignup()">Create Account</button>
+      <div class="a-sw">Have an account? <span onclick="showAuth('l')">Sign in</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div id="topbar">
+    <div class="tb1">
+      <div class="tb-title">MECH Tracker</div>
+      <div class="tb-meta" id="tbm">— / 127 hrs</div>
+      <div class="tb-gpa" id="tbg">GPA —</div>
+      <button class="tb-sync" id="tbs" onclick="manualSync()" title="Sync">⟳</button>
+      <div class="tb-out" onclick="doSignOut()">Sign out</div>
+    </div>
+    <div class="tb-prog">
+      <div class="tb-bar"><div class="tb-fill" id="tbf"></div></div>
+      <div class="tb-pct" id="tbp">0%</div>
+    </div>
+    <div class="tb-tabs">
+      <button class="tb-tab on" data-v="board"    onclick="swV('board',this)">Board</button>
+      <button class="tb-tab"    data-v="timeline" onclick="swV('timeline',this)">Timeline</button>
+      <button class="tb-tab"    data-v="gpa"      onclick="swV('gpa',this)">GPA</button>
+      <button class="tb-tab"    data-v="stats"    onclick="swV('stats',this)">Stats</button>
+    </div>
+    <div id="mob-dots">
+      <div class="md on" id="d0"></div>
+      <div class="md"    id="d1"></div>
+      <div class="md"    id="d2"></div>
+    </div>
+  </div>
+
+  <div id="views">
+    <div class="view on" id="v-board">
+      <div id="board">
+        <div class="col" data-col="done">
+          <div class="col-hdr">
+            <div class="col-t">Completed</div>
+            <div class="col-n" id="cn-done">0</div>
+            <div class="col-cr" id="cc-done">0 cr</div>
+          </div>
+          <div class="col-body" id="cb-done" ondragover="oDO(event,'done')" ondragleave="oDL(event,'done')" ondrop="oDR(event,'done')"></div>
+        </div>
+        <div class="col" data-col="ip">
+          <div class="col-hdr">
+            <div class="col-t">In Progress</div>
+            <div class="col-n" id="cn-ip">0</div>
+            <div class="col-cr" id="cc-ip">0 cr</div>
+          </div>
+          <div class="col-body" id="cb-ip" ondragover="oDO(event,'ip')" ondragleave="oDL(event,'ip')" ondrop="oDR(event,'ip')"></div>
+        </div>
+        <div class="col" data-col="await">
+          <div class="col-hdr">
+            <div class="col-t">Awaiting</div>
+            <div class="col-n" id="cn-await">0</div>
+            <div class="col-cr" id="cc-await">0 cr</div>
+          </div>
+          <div class="col-body" id="cb-await" ondragover="oDO(event,'await')" ondragleave="oDL(event,'await')" ondrop="oDR(event,'await')"></div>
+        </div>
+      </div>
+    </div>
+    <div class="view" id="v-timeline"><div class="vscroll"><div class="sem-grid" id="sem-g"></div></div></div>
+    <div class="view" id="v-gpa">
+      <div class="vscroll">
+        <div class="gpa-wrap">
+          <div class="gpa-hero"><div class="gpa-n" id="gn">—</div><div class="gpa-l">Major GPA · <span id="gh">0</span> hrs graded</div></div>
+          <div class="gpa-tbl">
+            <div class="gpa-h"><div class="gc">Course</div><div class="gc">Hrs</div><div class="gc">Grade</div><div class="gc">Pts</div></div>
+            <div id="gr"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="view" id="v-stats">
+      <div class="vscroll">
+        <div class="sc-grid" id="scg"></div>
+        <div class="pb" id="pbk"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile bottom tabs -->
+  <div id="mob-tabs">
+    <button class="mt on" data-v="board"    onclick="swV('board',this)"><div class="mt-i">⊞</div><div class="mt-l">Board</div></button>
+    <button class="mt"    data-v="timeline" onclick="swV('timeline',this)"><div class="mt-i">📅</div><div class="mt-l">Timeline</div></button>
+    <button class="mt"    data-v="gpa"      onclick="swV('gpa',this)"><div class="mt-i">📊</div><div class="mt-l">GPA</div></button>
+    <button class="mt"    data-v="stats"    onclick="swV('stats',this)"><div class="mt-i">🎯</div><div class="mt-l">Stats</div></button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="overlay">
+  <div class="modal">
+    <button class="mc" onclick="closeModal()">✕</button>
+    <div class="m-code" id="mc"></div>
+    <div class="m-title" id="mt"></div>
+    <div class="m-meta" id="mm"></div>
+    <div class="m-lbl">Institution</div>
+    <div class="irow">
+      <button class="ib" id="ib-utd" onclick="setInst('utd')"><span class="idot" style="background:rgba(251,146,60,.9)"></span>UT Dallas</button>
+      <button class="ib" id="ib-dc"  onclick="setInst('dc')"><span class="idot" style="background:rgba(56,189,248,.9)"></span>Dallas College</button>
+    </div>
+    <div class="m-lbl">Prerequisites</div>
+    <div id="mpr"></div>
+    <div id="mnt"></div>
+    <div id="mgs" style="display:none">
+      <div class="m-lbl">Grade</div>
+      <input class="g-inp" id="mg" type="text" maxlength="3" placeholder="A, B+, C-" autocapitalize="characters"/>
+    </div>
+    <button class="a-btn" onclick="saveModal()" style="margin-top:4px;margin-bottom:0">Save</button>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+
+const API='https://mech-tracker-api.vorahamaad.workers.dev';
+const LOCK='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAA7EAAAOxAGVKw4bAAACG0lEQVRIiZ2VMUsccRDF5y2yWAixsLhCLMXPYJHSKoKFH0Fb60AkXT6AlZWlSArxO6RTsIiNENIcZwjB04sQMBLu/VLcfy/r3f7vzgwszO7OvPdm9j+zEVMMaAH7ts+BO9t3wDmwD7Sm5U8CDuAN0CZv7RTzXwQbwAOAbYC27Y+2T0ZIH4CNl4Iv2O4kgCdgDyhr70tgz/ZTEtABFmYmsL2TwPvA+6YW2I70rp9IdmZVH8BpIvgBLE0QsgR8Ty08bRJSNOSVwEoi+iKpmyMoiqILfE3CViKiHI2Za6pAUkX8OwdemaQqpmgSPEZQgdfLBRYj4jWwLCki4gb4VBTFzxFhYwLGCCLCFbikeeAt8E7SwgjxL+BDRMzXnnlStYMIexn4lj7yn+qUZKyfYkg5y7MQHNSGi5f4tg+mgbeA2xRcT6zuO+kiE3PLpP0EbOVaYvsMWErXWa5ltrfqmKPHaq3hWWXHkrqSusBxElQXFxFRSFrLEgCvquAqufIlbTLYQWVEbDaAP8PIVdCLiJA0PNM1fxtYBVYlbWdihhiNBJKuIn+WC0lzMZidpmGMlHs1qYIL4KapRfwbvmf3dSLgRtLFpAruJR01lS+pjIhdYFdSmWnRkaT7TAeGahZtX2aOYXbQgEsGO2u6ASu2r3MD1eBfM1jXs1vaSSfAY64a4DH9o6fvoEwlBbBu+xD4DPRs95J/CKwDucGMiIi/rgRW8rpvaQEAAAAASUVORK5CYII=';
+
+
+let _s=null;
+const sbH=()=>({'Content-Type':'application/json','apikey':SK,'Authorization':`Bearer ${_s?.access_token||SK}`});
+// ── CLOUDFLARE WORKER API ──
+async function apiPost(path, body, token) {
+  const headers = {'Content-Type':'application/json'};
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  const r = await fetch(API + path, {method:'POST', headers, body:JSON.stringify(body)});
+  const d = await r.json().catch(()=>({}));
+  return {d, ok:r.ok};
+}
+async function sbIn(e,p){return apiPost('/auth/login',{email:e,password:p});}
+async function sbUp(e,p){return apiPost('/auth/register',{email:e,password:p});}
+async function sbOut(){_s=null;}
+async function sbUser(){
+  if(!_s?.token)return null;
+  try{
+    const parts=_s.token.split('.');
+    const p=JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+    if(p.exp*1000<Date.now()){return null;}
+    return{id:_s.userId,email:_s.email};
+  }catch{return null;}
+}
+async function sbLoad(uid){
+  const r=await fetch(API+'/data',{headers:{'Authorization':'Bearer '+_s.token}});
+  const d=await r.json().catch(()=>({}));
+  return d.data||null;
+}
+async function sbSave(uid,data){
+  const r=await fetch(API+'/data',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+_s.token},body:JSON.stringify({data})});
+  return r.ok;
+}
+const SKEY='mech_k1';
+function pSess(){if(_s)localStorage.setItem(SKEY,JSON.stringify({token:_s.token,userId:_s.userId,email:_s.email}));}
+function cSess(){localStorage.removeItem(SKEY);}
+function lSess(){try{const s=JSON.parse(localStorage.getItem(SKEY)||'null');if(s?.token){_s=s;return true;}}catch{}return false;}
+
+const COURSES=[
+  {id:'ECS1100', name:'Intro to Engineering & CS',credits:1,cat:'intro',prereqs:[],coreqs:[],sem:1},
+  {id:'MECH1100',name:'Intro to Mechanical Engineering I',credits:1,cat:'intro',prereqs:[],coreqs:[],sem:1},
+  {id:'MATH2413',name:'Differential Calculus (Calc I)',credits:4,cat:'prep',prereqs:[],coreqs:[],sem:1,note:'Requires ALEKS 80% or MATH 2312.'},
+  {id:'MATH2414',name:'Integral Calculus (Calc II)',credits:4,cat:'prep',prereqs:['MATH2413'],coreqs:[],sem:2},
+  {id:'MATH2415',name:'Calculus of Several Variables',credits:4,cat:'prep',prereqs:['MATH2414'],coreqs:[],sem:3,note:'On the 2413→2414→2415 path. After MATH 2414.'},
+  {id:'MATH2420',name:'Differential Equations',credits:4,cat:'prep',prereqs:['MATH2415'],coreqs:[],sem:4},
+  {id:'CHEM1311',name:'General Chemistry I',credits:3,cat:'prep',prereqs:[],coreqs:[],sem:1},
+  {id:'CHEM1111',name:'General Chemistry Lab I',credits:1,cat:'prep',prereqs:[],coreqs:['CHEM1311'],sem:1},
+  {id:'CS1325',  name:'Intro to Programming',credits:3,cat:'prep',prereqs:[],coreqs:[],sem:1,note:'Satisfied by CS 1337.'},
+  {id:'MECH1208',name:'Intro to Mechanical Engineering II',credits:2,cat:'prep',prereqs:['MECH1100'],coreqs:[],sem:2},
+  {id:'PHYS2325',name:'Mechanics (Physics I)',credits:3,cat:'prep',prereqs:['MATH2413'],coreqs:[],sem:2},
+  {id:'PHYS2125',name:'Physics Lab I',credits:1,cat:'prep',prereqs:['MATH2413'],coreqs:['PHYS2325'],sem:2},
+  {id:'PHYS2326',name:'Electromagnetism & Waves (Physics II)',credits:3,cat:'prep',prereqs:['PHYS2325','MATH2414'],coreqs:[],sem:3},
+  {id:'PHYS2126',name:'Physics Lab II',credits:1,cat:'prep',prereqs:['PHYS2325','MATH2414'],coreqs:['PHYS2326'],sem:3},
+  {id:'ENGR2300',name:'Applied Linear Algebra',credits:3,cat:'prep',prereqs:['MATH2413'],coreqs:[],sem:2},
+  {id:'MECH2310',name:'Statics',credits:3,cat:'prep',prereqs:['MECH1208','ENGR2300'],coreqs:[],sem:3},
+  {id:'MECH2320',name:'Mechanics of Materials',credits:3,cat:'prep',prereqs:['MECH2310'],coreqs:[],sem:4},
+  {id:'MECH2120',name:'Mechanics of Materials Lab',credits:1,cat:'prep',prereqs:['MECH2310'],coreqs:['MECH2320'],sem:4},
+  {id:'MECH2330',name:'Dynamics',credits:3,cat:'prep',prereqs:['MECH2310','MATH2420'],coreqs:[],sem:5},
+  {id:'MECH3300',name:'Applied Engineering Mathematics',credits:3,cat:'major',prereqs:['MATH2415','ENGR2300'],coreqs:['MATH2420'],sem:3,note:'Coreq: MATH 2420.'},
+  {id:'MECH3310',name:'Thermodynamics',credits:3,cat:'major',prereqs:['MECH1208','PHYS2325'],coreqs:['MECH3300'],sem:4},
+  {id:'MECH3315',name:'Fluid Mechanics',credits:3,cat:'major',prereqs:['MECH3300','MECH2330','MECH3310'],coreqs:[],sem:5},
+  {id:'MECH3115',name:'Fluid Mechanics Lab',credits:1,cat:'major',prereqs:['MECH3315'],coreqs:[],sem:6},
+  {id:'MECH3320',name:'Heat Transfer',credits:3,cat:'major',prereqs:['MECH3310','MECH3315'],coreqs:[],sem:6},
+  {id:'MECH3120',name:'Heat Transfer Lab',credits:1,cat:'major',prereqs:['MECH3320'],coreqs:[],sem:7},
+  {id:'MECH3305',name:'Computer Aided Design',credits:3,cat:'major',prereqs:['MECH1208','CS1325','ENGR2300'],coreqs:['MECH3105'],sem:5},
+  {id:'MECH3105',name:'CAD Laboratory',credits:1,cat:'major',prereqs:['MECH1208','CS1325','ENGR2300'],coreqs:['MECH3305'],sem:5},
+  {id:'MECH3350',name:'Kinematics & Dynamics of Mech. Systems',credits:3,cat:'major',prereqs:['MECH2330','MATH2420','ENGR2300','MECH3300'],coreqs:[],sem:5},
+  {id:'MECH3150',name:'Kinematics & Dynamics Lab',credits:1,cat:'major',prereqs:['MECH3350'],coreqs:[],sem:6},
+  {id:'MECH3351',name:'Design of Mechanical Systems',credits:3,cat:'major',prereqs:['MECH2320','MECH3350','MECH3300'],coreqs:[],sem:6},
+  {id:'MECH3340',name:'System Dynamics Modeling & Analysis',credits:3,cat:'major',prereqs:['MECH3315'],coreqs:[],sem:6},
+  {id:'ENGR3341',name:'Probability Theory & Statistics',credits:3,cat:'major',prereqs:['MATH2414'],coreqs:['MATH2420'],sem:4},
+  {id:'ECS2390', name:'Professional & Technical Communication',credits:3,cat:'major',prereqs:['RHET1302'],coreqs:[],sem:5},
+  {id:'MECH4310',name:'Systems and Controls',credits:3,cat:'major',prereqs:['MECH3340'],coreqs:[],sem:7},
+  {id:'MECH4110',name:'Systems and Controls Lab',credits:1,cat:'major',prereqs:['MECH3340'],coreqs:['MECH4310'],sem:7},
+  {id:'MECH4381',name:'Senior Design Project I',credits:3,cat:'major',prereqs:['MECH3351','MECH3340','MECH3320','MECH3305','ECS2390'],coreqs:[],sem:7},
+  {id:'MECH4382',name:'Senior Design Project II',credits:3,cat:'major',prereqs:['MECH4381'],coreqs:[],sem:8},
+  {id:'TE1',name:'Technical Elective 1',credits:3,cat:'elective',prereqs:[],coreqs:[],sem:7,note:'MECH 3XXX/4XXX. At least 3 of 4 from approved list.'},
+  {id:'TE2',name:'Technical Elective 2',credits:3,cat:'elective',prereqs:[],coreqs:[],sem:7},
+  {id:'TE3',name:'Technical Elective 3',credits:3,cat:'elective',prereqs:[],coreqs:[],sem:8},
+  {id:'TE4',name:'Technical Elective 4',credits:3,cat:'elective',prereqs:[],coreqs:[],sem:8},
+  {id:'RHET1302',name:'Rhetoric',credits:3,cat:'core',prereqs:[],coreqs:[],sem:1,note:'Completed via A.S.'},
+  {id:'GOVT2305',name:'American National Government',credits:3,cat:'core',prereqs:[],coreqs:[],sem:2,note:'Completed via A.S.'},
+  {id:'GOVT2306',name:'State & Local Government',credits:3,cat:'core',prereqs:[],coreqs:[],sem:2,note:'Completed via A.S.'},
+  {id:'HIST-A',  name:'American History I',credits:3,cat:'core',prereqs:[],coreqs:[],sem:1,note:'Completed via A.S.'},
+  {id:'HIST-B',  name:'American History II',credits:3,cat:'core',prereqs:[],coreqs:[],sem:1,note:'Completed via A.S.'},
+  {id:'CORE040', name:'Language, Philosophy & Culture',credits:3,cat:'core',prereqs:[],coreqs:[],sem:2,note:'Completed via A.S.'},
+  {id:'CORE050', name:'Creative Arts',credits:3,cat:'core',prereqs:[],coreqs:[],sem:2,note:'Completed via A.S.'},
+  {id:'CORE080', name:'Social & Behavioral Sciences',credits:3,cat:'core',prereqs:[],coreqs:[],sem:2,note:'Completed via A.S.'},
+  {id:'FE1',name:'Free Elective',credits:3,cat:'elective',prereqs:[],coreqs:[],sem:8},
+];
+const SEMS=[
+  {l:'Freshman — Fall',n:1},{l:'Freshman — Spring',n:2},
+  {l:'Sophomore — Fall',n:3},{l:'Sophomore — Spring',n:4},
+  {l:'Junior — Fall',n:5},{l:'Junior — Spring',n:6},
+  {l:'Senior — Fall',n:7},{l:'Senior — Spring',n:8},
+];
+const GP={'A':4.0,'A-':3.67,'B+':3.33,'B':3.0,'B-':2.67,'C+':2.33,'C':2.0,'C-':1.67,'D+':1.33,'D':1.0,'D-':0.67,'F':0,'WF':0};
+const TR={
+  'CHEM1311':{status:'done',grade:'TR',inst:'dc'},'CHEM1111':{status:'done',grade:'TR',inst:'dc'},
+  'CS1325':{status:'done',grade:'TR',inst:'dc'},'RHET1302':{status:'done',grade:'TR',inst:'dc'},
+  'GOVT2305':{status:'done',grade:'TR',inst:'dc'},'GOVT2306':{status:'done',grade:'TR',inst:'dc'},
+  'HIST-A':{status:'done',grade:'TR',inst:'dc'},'HIST-B':{status:'done',grade:'TR',inst:'dc'},
+  'CORE040':{status:'done',grade:'TR',inst:'dc'},'CORE050':{status:'done',grade:'TR',inst:'dc'},
+  'CORE080':{status:'done',grade:'TR',inst:'dc'},
+};
+
+let state={},usr=null,svT=null;
+const gS=id=>state[id]?.status||'ns';
+const gG=id=>state[id]?.grade||'';
+const gI=id=>state[id]?.inst||'utd';
+const iD=id=>gS(id)==='done';
+const iP=id=>gS(id)==='ip';
+const col=c=>iD(c.id)?'done':iP(c.id)?'ip':'await';
+const isLk=c=>!iD(c.id)&&!iP(c.id)&&!c.prereqs.every(p=>iD(p));
+
+function apD(){for(const[id,v]of Object.entries(TR)){if(!state[id])state[id]={...v};}}
+
+async function cloudLoad(){
+  if(!usr)return;
+  setSyn(true);
+  const d=await sbLoad(usr.id);
+  if(d)state=d;
+  apD();setSyn(false);
+}
+async function cloudSave(){
+  if(!usr)return;
+  setSyn(true);
+  const ok=await sbSave(usr.id,state);
+  setSyn(false);toast(ok?'Synced':'Sync failed');
+}
+function schedSave(){clearTimeout(svT);svT=setTimeout(cloudSave,900);}
+async function manualSync(){clearTimeout(svT);await cloudSave();}
+function setSyn(v){document.getElementById('tbs').classList.toggle('spin',v);}
+
+function showAuth(p){
+  document.getElementById('auth-l').style.display=p==='l'?'':'none';
+  document.getElementById('auth-s').style.display=p==='s'?'':'none';
+}
+function sE(id,m){const el=document.getElementById(id);el.textContent=m;el.style.display=m?'block':'none';}
+function sK(id,m){const el=document.getElementById(id);el.textContent=m;el.style.display=m?'block':'none';}
+
+async function doLogin(){
+  const e=document.getElementById('li').value.trim().toLowerCase();
+  const p=document.getElementById('lp').value;
+  sE('le','');sK('lk','');
+  if(!e||!p){sE('le','Please fill in all fields.');return;}
+  const btn=document.getElementById('lb');
+  btn.disabled=true;btn.textContent='Signing in…';
+  const{d,ok}=await sbIn(e,p);
+  btn.disabled=false;btn.textContent='Sign In';
+  if(!ok){sE('le',d?.error||d?.error_description||d?.msg||'Invalid credentials.');return;}
+  _s={token:d.token,userId:d.userId,email:d.email};pSess();await enterApp({id:d.userId,email:d.email});
+}
+async function doSignup(){
+  const e=document.getElementById('si').value.trim().toLowerCase();
+  const p=document.getElementById('sp').value;
+  const p2=document.getElementById('sp2').value;
+  sE('se','');sK('sk','');
+  if(!e||!p){sE('se','Please fill in all fields.');return;}
+  if(p.length<8){sE('se','Password must be at least 8 characters.');return;}
+  if(p!==p2){sE('se','Passwords do not match.');return;}
+  const btn=document.getElementById('sb');
+  btn.disabled=true;btn.textContent='Creating…';
+  const{d,ok}=await sbUp(e,p);
+  btn.disabled=false;btn.textContent='Create Account';
+  if(!ok){sE('se',d?.error||d?.error_description||d?.msg||'Sign-up failed.');return;}
+  _s={token:d.token,userId:d.userId,email:d.email};pSess();await enterApp({id:d.userId,email:d.email});
+}
+async function doSignOut(){
+  clearTimeout(svT);await sbOut();cSess();
+  state={};usr=null;
+  document.getElementById('app').classList.remove('on');
+  document.getElementById('auth').style.display='flex';
+  document.getElementById('li').value='';document.getElementById('lp').value='';
+}
+async function enterApp(u){
+  usr=u;
+  document.getElementById('auth').style.display='none';
+  document.getElementById('app').classList.add('on');
+  await cloudLoad();renderAll();
+}
+
+let curV='board';
+function swV(v,btn){
+  curV=v;
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
+  document.getElementById('v-'+v).classList.add('on');
+  document.querySelectorAll('.tb-tab,.mt').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll(`[data-v="${v}"]`).forEach(b=>b.classList.add('on'));
+  const md=document.getElementById('mob-dots');
+  if(md)md.style.display=v==='board'?'flex':'none';
+  if(v==='board')renderBoard();
+  else if(v==='timeline')renderTimeline();
+  else if(v==='gpa')renderGPA();
+  else if(v==='stats')renderStats();
+}
+
+function renderAll(){
+  updateTop();
+  if(curV==='board')renderBoard();
+  else if(curV==='timeline')renderTimeline();
+  else if(curV==='gpa')renderGPA();
+  else if(curV==='stats')renderStats();
+}
+
+function updateTop(){
+  const dc=COURSES.filter(c=>iD(c.id)).reduce((a,c)=>a+c.credits,0);
+  const pct=Math.round(dc/127*100);
+  document.getElementById('tbf').style.width=pct+'%';
+  document.getElementById('tbp').textContent=pct+'%';
+  document.getElementById('tbm').textContent=dc+' / 127 hrs';
+  const gr=COURSES.filter(c=>{const g=gG(c.id).toUpperCase();return iD(c.id)&&g&&GP[g]!==undefined&&(c.cat==='major'||c.cat==='prep');});
+  let tp=0,th=0;gr.forEach(c=>{const g=gG(c.id).toUpperCase();tp+=GP[g]*c.credits;th+=c.credits;});
+  document.getElementById('tbg').textContent=th?'GPA '+(tp/th).toFixed(2):'GPA —';
+}
+
+let dId=null;
+function renderBoard(){
+  const cols={done:[],ip:[],await:[]};
+  COURSES.forEach(c=>cols[col(c)].push(c));
+  ['done','ip','await'].forEach(k=>{
+    const body=document.getElementById('cb-'+k);
+    body.innerHTML='';
+    cols[k].forEach(c=>body.appendChild(mkCard(c)));
+    document.getElementById('cn-'+k).textContent=cols[k].length;
+    document.getElementById('cc-'+k).textContent=cols[k].reduce((a,c)=>a+c.credits,0)+' cr';
+  });
+}
+
+function mkCard(c){
+  const lk=isLk(c)&&col(c)==='await';
+  const inst=gI(c.id);const g=gG(c.id);
+  const div=document.createElement('div');
+  div.className=`kcard ${inst}${lk?' locked':''}`;
+  div.dataset.id=c.id;
+  if(!lk){
+    div.draggable=true;
+    div.addEventListener('dragstart',onDS);
+    div.addEventListener('click',()=>openModal(c.id));
+    div.addEventListener('touchend',e=>{e.preventDefault();openModal(c.id);},{passive:false});
+  }
+  div.innerHTML=
+    `<div class="kc-code">${c.id}</div>`+
+    `<div class="kc-name">${c.name}</div>`+
+    `<div class="kc-foot">`+
+      `<div class="kc-cr">${c.credits} cr</div>`+
+      (g&&iD(c.id)?`<div class="kc-grade">${g}</div>`:'')+
+      `<div class="kc-inst">${inst==='dc'?'DC':'UTD'}</div>`+
+    `</div>`+
+    `<div class="lock-ov"><img src="${LOCK}" alt=""/></div>`;
+  return div;
+}
+
+function onDS(e){dId=e.currentTarget.dataset.id;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+document.addEventListener('dragend',()=>{
+  document.querySelectorAll('.kcard.dragging').forEach(el=>el.classList.remove('dragging'));
+  document.querySelectorAll('.col-body.over').forEach(el=>el.classList.remove('over'));
+});
+function oDO(e,k){e.preventDefault();e.dataTransfer.dropEffect='move';document.getElementById('cb-'+k).classList.add('over');}
+function oDL(e,k){document.getElementById('cb-'+k).classList.remove('over');}
+function oDR(e,k){
+  e.preventDefault();
+  document.getElementById('cb-'+k).classList.remove('over');
+  if(!dId)return;
+  const status=k==='done'?'done':k==='ip'?'ip':'ns';
+  if(status===gS(dId)){dId=null;return;}
+  if(status==='done'){
+    state[dId]={...state[dId]||{},status:'done',inst:gI(dId)};
+    openModal(dId);
+  }else{
+    state[dId]={...state[dId]||{},status,grade:'',inst:gI(dId)};
+    renderAll();schedSave();
+    toast(status==='ip'?dId+' → In Progress':dId+' → Awaiting');
+  }
+  dId=null;
+}
+
+// Mobile column swipe
+let mobC=0,swX=0;
+const board=document.getElementById('board');
+board.addEventListener('touchstart',e=>{swX=e.touches[0].clientX;},{passive:true});
+board.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-swX;
+  if(Math.abs(dx)>55){
+    if(dx<0&&mobC<2)mobC++;
+    else if(dx>0&&mobC>0)mobC--;
+    board.scrollTo({left:mobC*window.innerWidth,behavior:'smooth'});
+    for(let i=0;i<3;i++){const d=document.getElementById('d'+i);if(d)d.classList.toggle('on',i===mobC);}
+  }
+});
+
+function renderTimeline(){
+  document.getElementById('sem-g').innerHTML=SEMS.map(sem=>{
+    const cs=COURSES.filter(c=>c.sem===sem.n);
+    const tot=cs.reduce((a,c)=>a+c.credits,0);
+    const don=cs.filter(c=>iD(c.id)).reduce((a,c)=>a+c.credits,0);
+    const rows=cs.map(c=>{
+      const lk=isLk(c);
+      const dc={done:'var(--green)',ip:'var(--yellow)',await:lk?'var(--text4)':'var(--text3)'}[col(c)];
+      const inst=gI(c.id);
+      const cc=lk?'var(--text4)':inst==='dc'?'rgba(56,189,248,.8)':'rgba(251,146,60,.8)';
+      return`<div class="sr ${lk?'lk':''}" ${!lk?`onclick="openModal('${c.id}')"`:''}>`+
+        `<div class="sr-dot" style="background:${dc}"></div>`+
+        `<div class="sr-code" style="color:${cc}">${c.id}</div>`+
+        `<div class="sr-name">${c.name}</div>`+
+        (gG(c.id)&&iD(c.id)?`<div class="sr-grade">${gG(c.id)}</div>`:'')+
+        `</div>`;
+    }).join('');
+    return`<div class="sem-block"><div class="sem-hdr"><div class="sem-hdr-t">${sem.l}</div><div class="sem-hdr-c">${don}/${tot} cr</div></div><div class="sem-rows">${rows}</div></div>`;
+  }).join('');
+}
+
+function renderGPA(){
+  const gr=COURSES.filter(c=>{const g=gG(c.id).toUpperCase();return iD(c.id)&&g&&GP[g]!==undefined&&(c.cat==='major'||c.cat==='prep');});
+  let tp=0,th=0;
+  const rows=gr.map(c=>{
+    const g=gG(c.id).toUpperCase(),pts=GP[g];
+    tp+=pts*c.credits;th+=c.credits;
+    const cl=pts>=3.5?'ga':pts>=2.5?'gb':pts>=1.5?'gc2':'gd';
+    return`<div class="gpa-r"><div class="gc nm">${c.name}</div><div class="gc">${c.credits}</div><div class="gc ${cl}">${g}</div><div class="gc">${(pts*c.credits).toFixed(2)}</div></div>`;
+  }).join('');
+  document.getElementById('gn').textContent=th?(tp/th).toFixed(3):'—';
+  document.getElementById('gh').textContent=th;
+  document.getElementById('gr').innerHTML=rows||`<div class="gc" style="color:var(--text3);padding:14px">No graded courses yet.</div>`;
+}
+
+function renderStats(){
+  const dn=COURSES.filter(c=>iD(c.id)),dc=dn.reduce((a,c)=>a+c.credits,0);
+  const ic=COURSES.filter(c=>iP(c.id)).reduce((a,c)=>a+c.credits,0);
+  document.getElementById('scg').innerHTML=[
+    {n:dc,l:'Completed'},
+    {n:127-dc,l:'Remaining'},
+    {n:ic,l:'In Progress'},
+    {n:Math.round(dc/127*100)+'%',l:'Complete'},
+  ].map(s=>`<div class="sc"><div class="sc-n">${s.n}</div><div class="sc-l">${s.l}</div></div>`).join('');
+  const cats=[{l:'First Year',k:'intro'},{l:'Preparatory',k:'prep'},{l:'Major Core',k:'major'},{l:'Electives',k:'elective'},{l:'State Core',k:'core'}];
+  document.getElementById('pbk').innerHTML='<div class="pb-t">By Category</div>'+
+    cats.map(c=>{
+      const all=COURSES.filter(x=>x.cat===c.k),dn2=all.filter(x=>iD(x.id));
+      const pct=all.length?Math.round(dn2.length/all.length*100):0;
+      return`<div class="pr"><div class="pr-l">${c.l}</div><div class="pr-b"><div class="pr-f" style="width:${pct}%"></div></div><div class="pr-p">${dn2.length}/${all.length}</div></div>`;
+    }).join('');
+}
+
+let mId=null,mInst='utd',mSt='ns';
+function openModal(id){
+  const c=COURSES.find(x=>x.id===id);if(!c)return;
+  mId=id;mInst=gI(id);mSt=gS(id);
+  const ce=document.getElementById('mc');
+  ce.textContent=c.id;ce.className='m-code '+mInst;
+  document.getElementById('mt').textContent=c.name;
+  document.getElementById('mm').textContent=`${c.credits} credit hour${c.credits!==1?'s':''} · Semester ${c.sem}`;
+  const pe=document.getElementById('mpr');
+  if(!c.prereqs.length&&!c.coreqs.length){
+    pe.innerHTML='<div style="font-size:13px;color:var(--text3);margin-bottom:18px">No prerequisites.</div>';
+  }else{
+    let h='<div class="plist">';
+    c.prereqs.forEach(p=>{const met=iD(p),pc=COURSES.find(x=>x.id===p);
+      h+=`<div class="prow"><span class="${met?'ok':'no'}">${met?'✓':'✗'}</span><b>${p}</b><span style="color:var(--text3);font-size:11px"> — ${pc?pc.name:'?'}</span></div>`;});
+    c.coreqs.forEach(p=>{const pc=COURSES.find(x=>x.id===p);
+      h+=`<div class="prow"><span class="co">⟲</span><b>${p}</b><span style="color:var(--text3);font-size:11px"> — ${pc?pc.name:'?'} (coreq)</span></div>`;});
+    pe.innerHTML=h+'</div>';
+  }
+  document.getElementById('mnt').innerHTML=c.note?`<div class="m-note">${c.note}</div>`:'';
+  const gs=document.getElementById('mgs');
+  gs.style.display=mSt==='done'?'block':'none';
+  document.getElementById('mg').value=gG(id);
+  updIB();
+  document.getElementById('overlay').classList.add('on');
+  document.querySelector('.modal').scrollTop=0;
+}
+function setInst(i){mInst=i;document.getElementById('mc').className='m-code '+i;updIB();}
+function updIB(){
+  document.getElementById('ib-utd').className='ib'+(mInst==='utd'?' on-utd':'');
+  document.getElementById('ib-dc').className='ib'+(mInst==='dc'?' on-dc':'');
+}
+function closeModal(){document.getElementById('overlay').classList.remove('on');}
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
+function saveModal(){
+  if(!mId)return;
+  const grade=mSt==='done'?document.getElementById('mg').value.trim().toUpperCase():'';
+  state[mId]={status:mSt,grade,inst:mInst};
+  closeModal();renderAll();schedSave();
+}
+
+let _tt;
+function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('on'),2400);}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeModal();
+  if(e.key==='Enter'&&document.activeElement?.classList.contains('a-inp')){
+    if(document.getElementById('auth-s').style.display==='none')doLogin();
+    else doSignup();
+  }
+});
+
+(async()=>{
+  if(lSess()){const u=await sbUser();if(u){await enterApp(u);return;}cSess();}
+  document.getElementById('auth').style.display='flex';
+})();
+</script>
+</body>
+</html>
