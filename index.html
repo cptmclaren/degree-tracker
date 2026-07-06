@@ -92,6 +92,7 @@ body{font-family:'SF Pro',-apple-system,BlinkMacSystemFont,"SF Pro Display","SF 
 
 /* CARD */
 .kcard{background:var(--surf);border-radius:var(--r);padding:14px 16px;cursor:grab;position:relative;overflow:hidden;transition:transform .3s var(--ease),box-shadow .3s var(--ease),opacity .2s var(--ease-in);user-select:none;border:1px solid var(--bdr)}
+.kcard{background:var(--surf);border-radius:var(--r);padding:14px 16px;cursor:grab;position:relative;overflow:hidden;transition:transform .3s var(--ease),box-shadow .3s var(--ease),opacity .2s var(--ease-in);user-select:none;border:1px solid var(--bdr);flex-shrink:0}
 .kcard:hover{box-shadow:0 8px 28px rgba(0,0,0,.5);transform:translateY(-2px) scale(1.005)}
 .kcard:active{cursor:grabbing}
 .kcard.dragging{transition:none;opacity:.45;transform:scale(.96)}
