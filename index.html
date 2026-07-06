@@ -1,4 +1,4 @@
-<!-- v2.1 -->
+<!-- v2.2 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +10,11 @@
 <title>MECH Tracker</title>
 
 <style>
+@font-face{font-family:'SF Pro';src:url('./fonts/SF-Pro-Text-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'SF Pro';src:url('./fonts/SF-Pro-Text-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'SF Pro';src:url('./fonts/SF-Pro-Display-Semibold.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'SF Pro';src:url('./fonts/SF-Pro-Display-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+
 :root{
   --bg:#000;--bg2:#0a0a0a;--surf:#111;--surf2:#1a1a1a;--surf3:#222;
   --bdr:rgba(255,255,255,.08);--bdr2:rgba(255,255,255,.13);
@@ -19,10 +24,12 @@
   --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
   --safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px);
   --r:16px;--r-sm:10px;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+  --ease-in:cubic-bezier(0.4,0,0.2,1);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;background:#000}
-body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;color:var(--text);height:100dvh;display:flex;flex-direction:column}
+body{font-family:'SF Pro',-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;color:var(--text);height:100dvh;display:flex;flex-direction:column}
 ::-webkit-scrollbar{width:0;height:0}
 
 /* AUTH */
@@ -31,11 +38,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 .a-word{font-size:26px;font-weight:700;letter-spacing:-.6px;margin-bottom:6px}
 .a-sub{font-size:14px;color:var(--text3);margin-bottom:32px;font-weight:400}
 .a-lbl{display:block;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.3px;margin-bottom:5px;text-transform:uppercase}
-.a-inp{width:100%;background:var(--surf);border:1px solid var(--bdr2);border-radius:var(--r-sm);padding:13px 15px;color:var(--text);font-family:inherit;font-size:16px;outline:none;transition:border-color .15s;-webkit-appearance:none;margin-bottom:11px}
+.a-inp{width:100%;background:var(--surf);border:1px solid var(--bdr2);border-radius:var(--r-sm);padding:13px 15px;color:var(--text);font-family:inherit;font-size:16px;outline:none;transition:border-color .2s var(--ease-in);-webkit-appearance:none;margin-bottom:11px}
 .a-inp:focus{border-color:rgba(255,255,255,.28)}
 .a-inp::placeholder{color:var(--text4)}
-.a-btn{width:100%;margin-top:6px;background:var(--text);color:var(--bg);border:none;border-radius:var(--r-sm);padding:14px;font-family:inherit;font-size:15px;font-weight:600;letter-spacing:-.2px;cursor:pointer;transition:opacity .15s;margin-bottom:14px}
-.a-btn:active{opacity:.8}
+.a-btn{width:100%;margin-top:6px;background:var(--text);color:var(--bg);border:none;border-radius:var(--r-sm);padding:14px;font-family:inherit;font-size:15px;font-weight:600;letter-spacing:-.2px;cursor:pointer;transition:opacity .2s var(--ease-in),transform .2s var(--ease);margin-bottom:14px}
+.a-btn:active{opacity:.8;transform:scale(.98)}
 .a-btn:disabled{opacity:.4;cursor:not-allowed}
 .a-sw{text-align:center;font-size:13px;color:var(--text3)}
 .a-sw span{color:var(--text);cursor:pointer;font-weight:500}
@@ -52,24 +59,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 .tb-title{font-size:14px;font-weight:600;letter-spacing:-.2px;margin-right:auto}
 .tb-meta{font-size:13px;color:var(--text3);font-variant-numeric:tabular-nums}
 .tb-gpa{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--surf2);color:var(--text2)}
-.tb-sync{width:28px;height:28px;border-radius:99px;background:none;border:1px solid var(--bdr2);color:var(--text3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.tb-sync{width:28px;height:28px;border-radius:99px;background:none;border:1px solid var(--bdr2);color:var(--text3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s var(--ease-in)}
 .tb-sync:active{background:var(--surf2)}
 .tb-sync.spin{animation:spin .7s linear infinite;color:var(--text2)}
 .tb-out{font-size:12px;color:var(--text3);cursor:pointer;padding:4px 0}
 .tb-out:hover{color:var(--text)}
 .tb-prog{padding:0 24px 8px;display:flex;align-items:center;gap:10px}
 .tb-bar{flex:1;height:2px;background:var(--surf3);border-radius:99px;overflow:hidden}
-.tb-fill{height:100%;background:var(--text2);border-radius:99px;transition:width .5s ease}
+.tb-fill{height:100%;background:var(--text2);border-radius:99px;transition:width .6s var(--ease)}
 .tb-pct{font-size:12px;color:var(--text3);font-variant-numeric:tabular-nums;min-width:30px;text-align:right}
 .tb-tabs{display:flex;padding:0 24px;border-top:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none}
 .tb-tabs::-webkit-scrollbar{display:none}
-.tb-tab{padding:9px 14px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border:none;background:none;font-family:inherit;letter-spacing:-.1px;border-bottom:1.5px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap}
+.tb-tab{padding:9px 14px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border:none;background:none;font-family:inherit;letter-spacing:-.1px;border-bottom:1.5px solid transparent;margin-bottom:-1px;transition:all .2s var(--ease-in);white-space:nowrap}
 .tb-tab.on{color:var(--text);border-bottom-color:var(--text)}
 
 /* VIEWS */
 #views{flex:1;overflow:hidden;position:relative}
 .view{display:none;height:100%}
-.view.on{display:flex;flex-direction:column}
+.view.on{display:flex;flex-direction:column;animation:viewIn .3s var(--ease)}
 .vscroll{flex:1;overflow-y:auto;padding:24px}
 
 /* BOARD */
@@ -81,13 +88,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 .col-cr{font-size:11px;color:var(--text4);margin-left:auto}
 .col-body{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;gap:7px;padding:2px 1px;scrollbar-width:none}
 .col-body::-webkit-scrollbar{display:none}
-.col-body.over{background:rgba(255,255,255,.025);border-radius:var(--r)}
+.col-body.over{background:rgba(255,255,255,.025);border-radius:var(--r);transition:background .2s var(--ease-in)}
 
 /* CARD */
-.kcard{background:var(--surf);border-radius:var(--r);padding:14px 16px;cursor:grab;position:relative;overflow:hidden;transition:transform .12s,box-shadow .12s,opacity .12s;user-select:none;border:1px solid var(--bdr)}
-.kcard:hover{box-shadow:0 6px 24px rgba(0,0,0,.5);transform:translateY(-1px)}
+.kcard{background:var(--surf);border-radius:var(--r);padding:14px 16px;cursor:grab;position:relative;overflow:hidden;transition:transform .3s var(--ease),box-shadow .3s var(--ease),opacity .2s var(--ease-in);user-select:none;border:1px solid var(--bdr)}
+.kcard:hover{box-shadow:0 8px 28px rgba(0,0,0,.5);transform:translateY(-2px) scale(1.005)}
 .kcard:active{cursor:grabbing}
-.kcard.dragging{opacity:.45;transform:scale(.96)}
+.kcard.dragging{transition:none;opacity:.45;transform:scale(.96)}
 .kcard::before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;border-radius:16px 0 0 16px}
 .kcard.utd::before{background:var(--utd)}
 .kcard.dc::before{background:var(--dc)}
@@ -100,7 +107,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 .kcard.utd .kc-code{color:rgba(251,146,60,.85)}
 .kcard.dc  .kc-code{color:rgba(56,189,248,.85)}
 .kcard.locked .kc-code{color:var(--text4)}
-.kc-name{font-size:13px;font-weight:500;line-height:1.35;color:var(--text);letter-spacing:-.1px;margin-bottom:10px}
+.kc-name{
+  font-size:13px;font-weight:500;line-height:1.35;color:var(--text);letter-spacing:-.1px;
+  margin-bottom:10px;word-break:break-word;overflow-wrap:break-word;hyphens:auto;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+  min-height:calc(13px * 1.35 * 2);
+}
 .kc-foot{display:flex;align-items:center;gap:6px}
 .kc-cr{font-size:11px;color:var(--text3)}
 .kc-grade{margin-left:auto;font-size:12px;font-weight:600;color:var(--green)}
@@ -116,12 +128,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 .sem-hdr-t{font-size:12px;font-weight:600;letter-spacing:-.1px}
 .sem-hdr-c{font-size:11px;color:var(--text3)}
 .sem-rows{padding:5px}
-.sr{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;cursor:pointer;transition:background .1s}
+.sr{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;cursor:pointer;transition:background .15s var(--ease-in)}
 .sr:hover{background:var(--surf2)}
 .sr.lk{opacity:.25;cursor:default;pointer-events:none}
 .sr-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .sr-code{font-size:10.5px;font-weight:600;min-width:70px;flex-shrink:0}
-.sr-name{font-size:12px;color:var(--text2);flex:1;line-height:1.3}
+.sr-name{
+  font-size:12px;color:var(--text2);flex:1;line-height:1.3;
+  word-break:break-word;overflow-wrap:break-word;
+}
 .sr-grade{font-size:11px;font-weight:600;color:var(--green);margin-left:auto}
 
 /* GPA */
@@ -149,22 +164,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 .pr:last-child{margin-bottom:0}
 .pr-l{font-size:12px;color:var(--text2);min-width:115px;flex-shrink:0}
 .pr-b{flex:1;height:3px;background:var(--surf3);border-radius:99px;overflow:hidden}
-.pr-f{height:100%;border-radius:99px;background:var(--text3);transition:width .5s ease}
+.pr-f{height:100%;border-radius:99px;background:var(--text3);transition:width .6s var(--ease)}
 .pr-p{font-size:11px;color:var(--text3);min-width:32px;text-align:right}
 
 /* MODAL */
-#overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:500;display:none;align-items:center;justify-content:center;padding:24px}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:500;display:none;align-items:center;justify-content:center;padding:24px;transition:opacity .3s var(--ease-in)}
 #overlay.on{display:flex}
-.modal{background:var(--surf);border-radius:20px;border:1px solid var(--bdr2);padding:26px;width:100%;max-width:420px;max-height:85dvh;overflow-y:auto;position:relative;animation:fadeUp .18s ease}
-.mc{position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:99px;background:var(--surf2);border:none;color:var(--text3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal{background:var(--surf);border-radius:20px;border:1px solid var(--bdr2);padding:26px;width:100%;max-width:420px;max-height:85dvh;overflow-y:auto;position:relative;animation:modalIn .4s var(--ease)}
+.mc{position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:99px;background:var(--surf2);border:none;color:var(--text3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s var(--ease-in),transform .2s var(--ease)}
 .mc:hover{background:var(--surf3)}
+.mc:active{transform:scale(.9)}
 .m-code{font-size:11px;font-weight:600;letter-spacing:.3px;color:var(--text3);margin-bottom:3px}
 .m-code.utd{color:rgba(251,146,60,.9)}.m-code.dc{color:rgba(56,189,248,.9)}
 .m-title{font-size:19px;font-weight:700;letter-spacing:-.4px;margin-bottom:3px}
 .m-meta{font-size:12px;color:var(--text3);margin-bottom:20px}
 .m-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:7px}
 .irow{display:flex;gap:8px;margin-bottom:18px}
-.ib{flex:1;padding:10px;border-radius:var(--r-sm);border:1px solid var(--bdr2);background:none;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.ib{flex:1;padding:10px;border-radius:var(--r-sm);border:1px solid var(--bdr2);background:none;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .2s var(--ease-in);display:flex;align-items:center;justify-content:center;gap:6px}
 .ib:active{transform:scale(.97)}
 .ib.on-utd{background:rgba(251,146,60,.1);border-color:rgba(251,146,60,.35);color:rgba(251,146,60,1)}
 .ib.on-dc{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.35);color:rgba(56,189,248,1)}
@@ -174,11 +190,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 .prow .ok{color:var(--green)}.prow .no{color:var(--red)}.prow .co{color:var(--text4);font-size:11px}
 .prow b{color:var(--text);font-weight:600}
 .m-note{font-size:12px;color:var(--text3);padding:10px 12px;background:var(--surf2);border-radius:var(--r-sm);margin-bottom:14px;line-height:1.5}
-.g-inp{width:100%;background:var(--surf2);border:1px solid var(--bdr2);border-radius:var(--r-sm);padding:12px 15px;color:var(--text);font-family:inherit;font-size:16px;font-weight:600;margin-bottom:14px;outline:none;transition:border-color .15s;-webkit-appearance:none}
+.g-inp{width:100%;background:var(--surf2);border:1px solid var(--bdr2);border-radius:var(--r-sm);padding:12px 15px;color:var(--text);font-family:inherit;font-size:16px;font-weight:600;margin-bottom:14px;outline:none;transition:border-color .2s var(--ease-in);-webkit-appearance:none}
 .g-inp:focus{border-color:rgba(255,255,255,.28)}
 
 /* TOAST */
-#toast{position:fixed;bottom:calc(22px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(8px);background:rgba(30,30,30,.9);border:1px solid var(--bdr2);border-radius:99px;padding:9px 18px;font-size:13px;font-weight:500;color:var(--text2);opacity:0;transition:all .22s;z-index:800;pointer-events:none;white-space:nowrap;backdrop-filter:blur(12px)}
+#toast{position:fixed;bottom:calc(22px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(8px);background:rgba(30,30,30,.9);border:1px solid var(--bdr2);border-radius:99px;padding:9px 18px;font-size:13px;font-weight:500;color:var(--text2);opacity:0;transition:all .3s var(--ease);z-index:800;pointer-events:none;white-space:nowrap;backdrop-filter:blur(12px)}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* MOBILE */
@@ -194,17 +210,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
   .kcard{border-radius:13px;padding:15px 16px}
   .kcard:hover{transform:none;box-shadow:none}
   .kcard:active{transform:scale(.98);opacity:.85}
-  .kc-name{font-size:13.5px;margin-bottom:10px}
+  .kc-name{font-size:13.5px;margin-bottom:10px;min-height:calc(13.5px * 1.35 * 2)}
   #mob-dots{display:flex!important;justify-content:center;gap:5px;padding:6px 0;flex-shrink:0}
-  .md{width:6px;height:6px;border-radius:50%;background:var(--text4);transition:all .2s}
+  .md{width:6px;height:6px;border-radius:50%;background:var(--text4);transition:all .3s var(--ease)}
   .md.on{background:var(--text);width:16px}
   #mob-tabs{display:flex!important;position:fixed;bottom:0;left:0;right:0;background:rgba(8,8,8,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--bdr);padding:7px 0;padding-bottom:calc(7px + var(--safe-bot));z-index:400}
-  .mt{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 4px;border:none;background:none;cursor:pointer;transition:all .15s}
+  .mt{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 4px;border:none;background:none;cursor:pointer;transition:all .2s var(--ease-in)}
   .mt:active{transform:scale(.88)}
-  .mt-i{display:flex;align-items:center;justify-content:center;line-height:1;transition:transform .2s;color:var(--text3)}
+  .mt-i{display:flex;align-items:center;justify-content:center;line-height:1;transition:transform .3s var(--ease);color:var(--text3)}
   .mt-l{font-size:10px;font-weight:500;color:var(--text3);letter-spacing:-.1px}
   .mt.on .mt-l{color:var(--text)}
-  .mt.on .mt-i{transform:scale(1.1);color:var(--text)}
+  .mt.on .mt-i{transform:scale(1.15);color:var(--text)}
   #overlay{align-items:flex-end;padding:0}
   .modal{border-radius:24px 24px 0 0;max-height:88dvh;padding:10px 22px calc(28px + var(--safe-bot));width:100%;max-width:100%}
   .modal::before{content:"";display:block;width:34px;height:4px;background:var(--surf3);border-radius:99px;margin:0 auto 18px}
@@ -219,7 +235,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
   #mob-dots{display:none!important}
 }
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
