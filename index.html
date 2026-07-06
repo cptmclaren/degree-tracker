@@ -239,6 +239,11 @@ body{font-family:'SF Pro',-apple-system,BlinkMacSystemFont,"SF Pro Display","SF 
       0 2px 8px rgba(0,0,0,.25);
     touch-action:none;
   }
+  #mob-tabs.edge{
+  background:rgba(20,20,22,.68);
+  backdrop-filter:blur(34px) saturate(200%);
+  -webkit-backdrop-filter:blur(34px) saturate(200%);
+}
   #mob-tabs::before{
     content:"";
     position:absolute;
@@ -278,6 +283,15 @@ body{font-family:'SF Pro',-apple-system,BlinkMacSystemFont,"SF Pro Display","SF 
   .gpa-n{font-size:50px}
   #toast{bottom:calc(92px + var(--safe-bot))}
 }
+  @media (prefers-reduced-transparency: reduce){
+  #mob-tabs{
+    background:rgba(18,18,20,.96);
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+  }
+  #mob-tabs::before{display:none}
+  .mt-indicator{background:rgba(255,255,255,.12);box-shadow:none}
+}
 @media(min-width:769px){
   #mob-tabs{display:none!important}
   #mob-dots{display:none!important}
@@ -285,6 +299,12 @@ body{font-family:'SF Pro',-apple-system,BlinkMacSystemFont,"SF Pro Display","SF 
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  @media (prefers-reduced-motion: reduce){
+  .kcard,.a-btn,.mc,.tb-sync,.sr,.ib,.a-inp,.g-inp,.tb-fill,.pr-f,.mt,.mt-i,.mt-l,.mt-indicator,#overlay,.modal,#toast,.view.on{
+    transition:none!important;
+    animation:none!important;
+  }
+}
 </style>
 </head>
 <body>
@@ -973,8 +993,9 @@ document.addEventListener('keydown',e=>{
     };
   }
 
-  const cSpring=spring(0.22,0.78);
-  const wSpring=spring(0.16,0.70);
+const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cSpring=spring(reduceMotion?1:0.22,reduceMotion?1:0.78);
+const wSpring=spring(reduceMotion?1:0.16,reduceMotion?1:0.70);
   let baseW=0;
 
   function layout(i){const t=tabs()[i];if(!t)return{c:0,w:0};return{c:t.offsetLeft+t.offsetWidth/2,w:t.offsetWidth};}
@@ -1016,6 +1037,26 @@ document.addEventListener('keydown',e=>{
   window.addEventListener('resize',()=>{snapTo(activeIndex(),true);});
   requestAnimationFrame(()=>snapTo(activeIndex(),true));
   window._reindicate=()=>snapTo(activeIndex(),true);
+})();
+  // ── Scroll-reactive glass intensity ──
+(function(){
+  const bar=document.getElementById('mob-tabs');
+  if(!bar)return;
+  const bodies=['cb-done','cb-ip','cb-await'].map(id=>document.getElementById(id)).filter(Boolean);
+  let ticking=false;
+  function checkEdge(){
+    ticking=false;
+    const active=bodies.find(b=>{
+      const rect=b.getBoundingClientRect();
+      return rect.width>0&&rect.left>=-1&&rect.left<window.innerWidth;
+    });
+    if(!active){bar.classList.remove('edge');return;}
+    const nearBottom=active.scrollHeight-active.scrollTop-active.clientHeight<40;
+    bar.classList.toggle('edge',nearBottom&&active.scrollTop>0);
+  }
+  bodies.forEach(b=>b.addEventListener('scroll',()=>{
+    if(!ticking){ticking=true;requestAnimationFrame(checkEdge);}
+  },{passive:true}));
 })();
 
 (async()=>{
