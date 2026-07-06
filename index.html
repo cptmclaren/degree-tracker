@@ -643,11 +643,29 @@ function mkCard(c){
   div.className=`kcard ${inst}${lk?' locked':''}`;
   div.dataset.id=c.id;
   if(!lk){
-    div.draggable=true;
-    div.addEventListener('dragstart',onDS);
-    div.addEventListener('click',()=>openModal(c.id));
-    div.addEventListener('touchend',e=>{e.preventDefault();openModal(c.id);},{passive:false});
-  }
+  div.draggable=true;
+  div.addEventListener('dragstart',onDS);
+  let tsx=0,tsy=0,tMoved=false,tGuard=false;
+  div.addEventListener('touchstart',e=>{
+    const t=e.touches[0];tsx=t.clientX;tsy=t.clientY;tMoved=false;
+  },{passive:true});
+  div.addEventListener('touchmove',e=>{
+    const t=e.touches[0];
+    if(Math.abs(t.clientX-tsx)>10||Math.abs(t.clientY-tsy)>10)tMoved=true;
+  },{passive:true});
+  div.addEventListener('touchend',e=>{
+    if(!tMoved){
+      e.preventDefault();
+      tGuard=true;
+      openModal(c.id);
+      setTimeout(()=>{tGuard=false;},400);
+    }
+  },{passive:false});
+  div.addEventListener('click',()=>{
+    if(tGuard)return;
+    openModal(c.id);
+  });
+}
   div.innerHTML=
     `<div class="kc-code">${c.id}</div>`+
     `<div class="kc-name">${c.name}</div>`+
